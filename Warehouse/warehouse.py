@@ -25,6 +25,7 @@ import pickle
 # Global Var
 catalog = []
 data_file = 'Warehouse.data'
+last_id = 1
 
 def serialize_catalog():
     global data_file
@@ -35,12 +36,16 @@ def serialize_catalog():
 
 def deserialize_catalog():
     try:
+        global last_id
         global data_file
         reader = open(data_file, 'rb')#Open file to read binary
         temp_list = pickle.load(reader)
     
         for item in temp_list:
             catalog.append(item)
+
+        last_item = catalog[-1]
+        last_id = last_item.id + 1
 
         print("** Deserialized " + str(len(catalog)) + " Items" )
     
@@ -49,6 +54,7 @@ def deserialize_catalog():
 
 # Fn
 def Register():
+    global last_id
     try:
         print_header("Register New Item")
         title = str(input("Please provide a Title: "))
@@ -57,9 +63,12 @@ def Register():
         stock = int(input("Please provide the amount of Stock: "))
         value = float
 
-        id = 1
+        id = last_id
+        last_id += 1
+
         item = Item(id, title, cat, price, stock)
         catalog.append(item)
+       
 
         how_many = len(catalog)
         print("you now have: " + str(how_many) + " items on the catalog")
@@ -101,6 +110,57 @@ def display_catagories():
         num += 1
         print(" Category "+ str(num) + item.rjust(20))
 
+def update_stock():
+    #set stock value  
+    try:
+        display_catalog()
+        id = input("PLease Provide the item id: ")
+        found = False
+        for item in catalog:
+            if (str(item.id) == id):
+                found= True
+                val = input("Please provide new stock value: ")
+                item.stock = int(val)
+                print("Stock value updated")
+        if(not found):
+            print("**Error: Invalid Id, Verify and try again!")
+    except ValueError:
+        print("Error, you have entered an invalid character")
+    except:
+        print("Error, Something went wrong")
+
+def update_price():
+    try:
+        display_catalog()
+        id = input("PLease Provide the item id: ")
+        found = False
+        for item in catalog:
+            if (str(item.id) == id):
+                found= True
+                pr = input("Please provide new Price: ")
+                item.price = float(pr)
+                print("Price has been updated")
+        if(not found):
+            print("**Error: Invalid Id, Verify and try again!")
+    except ValueError:
+        print("Error, you have entered an invalid character")
+    except:
+        print("Error, Something went wrong")
+
+def delete_item():
+    display_catalog()
+    id = input("Please Provide the item id: ")
+    found = False
+    for item in catalog:
+        if(str(item.id) == id):
+            found = True
+            print_item(item)
+            ans = input("Is this the item you want to delete? Y or N: ")
+            if(ans == 'y'):
+                catalog.remove(item)
+                print("Item Deleted")
+
+
 
 #  Instructions
 deserialize_catalog()
@@ -117,6 +177,15 @@ while(opc != "x"):
         serialize_catalog()
     elif(opc == '2'):
         display_catalog()
+    elif(opc == '3'):
+        update_stock()
+        serialize_catalog()
+    elif(opc =='4'):
+        update_price()
+        serialize_catalog()
+    elif(opc == '5'):
+        delete_item()
+        serialize_catalog()
     elif(opc =='6'):
         display_out_of_stock()
     elif(opc =='7'):
